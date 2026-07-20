@@ -35,10 +35,13 @@
         .form-control:focus, .form-select:focus { background-color: #0f172a; border-color: var(--accent-color); color: #fff; box-shadow: 0 0 0 0.25rem var(--accent-glow); }
         .form-control::placeholder { color: #64748b; }
         
-        /* Dark Tables */
+        /* Dark Tables & Fix Hover Text Contrast */
         .table { color: var(--text-primary); border-color: var(--border-color); }
         .table-dark { background-color: #090d16 !important; color: #fff; border-color: var(--border-color); }
-        .table-hover tbody tr:hover { background-color: rgba(255, 255, 255, 0.03); color: #fff; }
+        .table-hover tbody tr { background-color: #1e293b; color: #f8fafc; }
+        .table-hover tbody tr:hover { background-color: #334155 !important; color: #ffffff !important; }
+        .table-hover tbody tr:hover td { color: #ffffff !important; }
+        
         .dropdown-menu { background-color: var(--card-bg); border: 1px solid var(--border-color); }
         .dropdown-item { color: var(--text-secondary); }
         .dropdown-item:hover { background-color: var(--accent-color); color: #fff; }
@@ -616,10 +619,10 @@
                     <td class="ps-4 text-white"><strong>${emp.name}</strong></td>
                     <td class="text-white">${emp.baseSalary.toLocaleString()} ${curr}</td>
                     <td><span class="badge bg-dark border border-secondary text-info">${p.rating} / 5</span></td>
-                    <td class="text-danger">${p.deductions.toLocaleString()} ${curr}</td>
-                    <td class="text-success">${p.attendanceBonus.toLocaleString()} ${curr}</td>
-                    <td class="text-warning">${tAdvance.toLocaleString()} ${curr}</td>
-                    <td class="text-secondary">${p.repayment.toLocaleString()} ${curr}</td>
+                    <td class="text-danger fw-semibold">${p.deductions.toLocaleString()} ${curr}</td>
+                    <td class="text-success fw-semibold">${p.attendanceBonus.toLocaleString()} ${curr}</td>
+                    <td class="text-warning fw-semibold">${tAdvance.toLocaleString()} ${curr}</td>
+                    <td class="text-secondary fw-semibold">${p.repayment.toLocaleString()} ${curr}</td>
                     <td class="text-warning fw-bold">${rAdvance.toLocaleString()} ${curr}</td>
                     <td><strong class="text-success fs-6">${p.netSalary.toLocaleString()} ${curr}</strong></td>
                     <td class="text-end pe-4">
