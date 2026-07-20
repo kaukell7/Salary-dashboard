@@ -206,6 +206,7 @@
                                             <th data-i18n="tbl_rating">Rating</th>
                                             <th data-i18n="tbl_deduct">Deductions</th>
                                             <th data-i18n="tbl_adv">Advance</th>
+                                            <th data-i18n="tbl_repay">Repayment</th>
                                             <th data-i18n="tbl_net">Net Salary</th>
                                             <th class="text-end pe-4" data-i18n="tbl_actions">Actions</th>
                                         </tr>
@@ -253,6 +254,7 @@
                 tbl_rating: "Rating",
                 tbl_deduct: "Deductions",
                 tbl_adv: "Advance",
+                tbl_repay: "Repayment",
                 tbl_net: "Net Salary",
                 currency: "Ks"
             },
@@ -280,6 +282,7 @@
                 tbl_rating: "အမှတ်",
                 tbl_deduct: "ဖြတ်ငွေ",
                 tbl_adv: "ချေးငွေ",
+                tbl_repay: "ပြန်ဆပ်ငွေ",
                 tbl_net: "လက်ကျန်လစာ (Net)",
                 currency: "ကျပ်"
             }
@@ -373,7 +376,6 @@
             if(rating === 5) bonus = emp.baseSalary * 0.10;
             else if(rating === 1) bonus = -(emp.baseSalary * 0.10);
 
-            // ပြင်ဆင်လိုက်သော တွက်ချက်မှုပုံစံ (Advance ကို နုတ်ပြီး Repayment ကို ပြန်ဆပ်/ပေါင်းထည့်သည်)
             let netSalary = emp.baseSalary + bonus - deductions - advance + repayment;
 
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
@@ -431,6 +433,7 @@
                     <td><span class="badge bg-info text-dark">${p.rating} / 5</span></td>
                     <td class="text-danger">-${p.deductions.toLocaleString()} ${curr}</td>
                     <td class="text-warning fw-semibold">-${p.advance.toLocaleString()} ${curr}</td>
+                    <td class="text-primary fw-semibold">+${p.repayment.toLocaleString()} ${curr}</td>
                     <td class="fw-bold text-success">${p.netSalary.toLocaleString()} ${curr}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-danger" onclick="deletePayroll(${p.empId})"><i class="fa-solid fa-trash"></i></button>
