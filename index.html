@@ -225,8 +225,8 @@
                                         <input type="number" class="form-control" id="pay-attendance-bonus" value="100000">
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold text-secondary" data-i18n="lbl_advance">Salary Advance (Ks)</label>
-                                        <input type="number" class="form-control" id="pay-advance" value="0">
+                                        <label class="form-label fw-bold text-secondary" data-i18n="lbl_total_advance">Total Advance (Existing/New) (Ks)</label>
+                                        <input type="number" class="form-control" id="pay-total-advance" value="0">
                                     </div>
                                     <div class="col-md-12">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_repayment">Advance Repayment (Ks)</label>
@@ -298,7 +298,7 @@
                 lbl_deductions: "Error Deductions (Ks)",
                 lbl_absence: "Total Leave/Absent Days",
                 lbl_attendance_bonus: "Attendance Bonus Amount (Ks)",
-                lbl_advance: "Salary Advance (Ks)",
+                lbl_total_advance: "Total Advance (Existing/New) (Ks)",
                 lbl_repayment: "Advance Repayment (Ks)",
                 btn_calc: "Calculate & Save Payroll",
                 tbl_rating: "Rating",
@@ -335,7 +335,7 @@
                 lbl_deductions: "အမှားအတွက် ဖြတ်တောက်ငွေ (ကျပ်)",
                 lbl_absence: "ပျက်ကွက်/ခွင့်ယူရက် စုစုပေါင်း",
                 lbl_attendance_bonus: "ရက်မှန်ကြေး သတ်မှတ်ငွေ (ကျပ်)",
-                lbl_advance: "လစာကြိုတင် ထုတ်ယူငွေ (ကျပ်)",
+                lbl_total_advance: "စုစုပေါင်း ကြိုထုတ်ငွေ (ကျပ်)",
                 lbl_repayment: "ချေးငွေ ပြန်ဆပ်ငွေ (ကျပ်)",
                 btn_calc: "လစာတွက်ချက်ပြီး သိမ်းမည်",
                 tbl_rating: "အမှတ်",
@@ -343,7 +343,7 @@
                 tbl_att_bonus: "ရက်မှန်ကြေး",
                 tbl_total_adv_col: "ကြိုထုတ်ငွေ",
                 tbl_repay: "ပြန်ဆပ်ငွေ",
-                tbl_adv: "ကျန်ရှိချေးငွေ",
+                tbl_adv: "ဆပ်ရန်ကျန်ငွေ",
                 tbl_net: "လက်ကျန်လစာ (Net)",
                 tbl_status: "အခြေအနေ (Done / Off)",
                 tbl_total_present: "စုစုပေါင်း လာသည့်ရက်",
@@ -510,7 +510,7 @@
             const deductions = parseFloat(document.getElementById('pay-deductions').value) || 0;
             const absenceDays = parseInt(document.getElementById('pay-absence').value) || 0;
             const baseAttBonus = parseFloat(document.getElementById('pay-attendance-bonus').value) || 0;
-            const advance = parseFloat(document.getElementById('pay-advance').value) || 0;
+            const totalAdvance = parseFloat(document.getElementById('pay-total-advance').value) || 0;
             const repayment = parseFloat(document.getElementById('pay-repayment').value) || 0;
 
             const emp = employees.find(x => x.id == empId);
@@ -522,11 +522,14 @@
 
             let attendanceBonus = (absenceDays <= 2) ? baseAttBonus : 0;
 
-            let netSalary = emp.baseSalary + bonus + attendanceBonus - deductions - advance + repayment;
-            let remainingAdvance = advance - repayment;
+            // Net Salary = Base + Bonus + Attendance Bonus - Deductions - Repayment
+            let netSalary = emp.baseSalary + bonus + attendanceBonus - deductions - repayment;
+            
+            // Remaining Balance = Total Advance - Repayment
+            let remainingAdvance = totalAdvance - repayment;
 
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
-            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, totalAdvance: advance, remainingAdvance, repayment, netSalary };
+            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, totalAdvance, remainingAdvance, repayment, netSalary };
 
             if(existingIndex >= 0) {
                 payrolls[existingIndex] = payrollData;
@@ -575,10 +578,10 @@
                 const emp = employees.find(x => x.id == p.empId);
                 if(!emp) return;
                 totalNet += p.netSalary;
-                totalAdvSum += (p.remainingAdvance !== undefined ? p.remainingAdvance : p.advance);
+                totalAdvSum += (p.remainingAdvance !== undefined ? p.remainingAdvance : p.totalAdvance);
 
-                const tAdvance = (p.totalAdvance !== undefined ? p.totalAdvance : (p.remainingAdvance + p.repayment));
-                const rAdvance = (p.remainingAdvance !== undefined ? p.remainingAdvance : p.advance);
+                const tAdvance = (p.totalAdvance !== undefined ? p.totalAdvance : 0);
+                const rAdvance = (p.remainingAdvance !== undefined ? p.remainingAdvance : tAdvance);
 
                 payHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
