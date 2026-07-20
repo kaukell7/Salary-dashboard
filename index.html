@@ -240,16 +240,6 @@
                         </div>
                     </div>
 
-                    <!-- Total Summary Bar for Advances -->
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <div class="card bg-light border p-3">
-                                <span class="text-muted small fw-bold text-uppercase" data-i18n="lbl_total_adv_sum">Total Outstanding Advance Balance</span>
-                                <h4 id="summary-total-advance" class="fw-bold text-danger m-0 mt-1">0 Ks</h4>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="card">
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -261,8 +251,9 @@
                                             <th data-i18n="tbl_rating">Rating</th>
                                             <th data-i18n="tbl_deduct">Deductions</th>
                                             <th data-i18n="tbl_att_bonus">Attendance Bonus</th>
-                                            <th data-i18n="tbl_adv">Advance Balance</th>
+                                            <th data-i18n="tbl_total_adv_col">Total Advance</th>
                                             <th data-i18n="tbl_repay">Repayment</th>
+                                            <th data-i18n="tbl_adv">Remaining Balance</th>
                                             <th data-i18n="tbl_net">Net Salary</th>
                                             <th class="text-end pe-4" data-i18n="tbl_actions">Actions</th>
                                         </tr>
@@ -294,7 +285,6 @@
                 lbl_total_emp: "Total Employees",
                 lbl_total_net: "Total Net Salary Paid",
                 lbl_total_adv: "Total Advances Outstanding",
-                lbl_total_adv_sum: "Total Outstanding Advance Balance",
                 lbl_emp_name: "Employee Name",
                 lbl_emp_position: "Position",
                 lbl_emp_salary: "Base Salary (Ks)",
@@ -314,8 +304,9 @@
                 tbl_rating: "Rating",
                 tbl_deduct: "Deductions",
                 tbl_att_bonus: "Att. Bonus",
-                tbl_adv: "Advance Balance",
+                tbl_total_adv_col: "Total Advance",
                 tbl_repay: "Repayment",
+                tbl_adv: "Remaining Balance",
                 tbl_net: "Net Salary",
                 tbl_status: "Status (Done / Off)",
                 tbl_total_present: "Total Present",
@@ -331,7 +322,6 @@
                 lbl_total_emp: "စုစုပေါင်း ဝန်ထမ်းဦးရေ",
                 lbl_total_net: "ပေးချေပြီး စုစုပေါင်း သက်သာလစာ",
                 lbl_total_adv: "ထုတ်ယူထားဆဲ ချေးငွေစုစုပေါင်း",
-                lbl_total_adv_sum: "စုစုပေါင်း ကျန်ရှိချေးငွေလက်ကျန်",
                 lbl_emp_name: "ဝန်ထမ်းအမည်",
                 lbl_emp_position: "ရာထူး",
                 lbl_emp_salary: "အခြေခံလစာ (ကျပ်)",
@@ -351,8 +341,9 @@
                 tbl_rating: "အမှတ်",
                 tbl_deduct: "ဖြတ်ငွေ",
                 tbl_att_bonus: "ရက်မှန်ကြေး",
-                tbl_adv: "ကျန်ရှိချေးငွေ",
+                tbl_total_adv_col: "ကြိုထုတ်ငွေ",
                 tbl_repay: "ပြန်ဆပ်ငွေ",
+                tbl_adv: "ကျန်ရှိချေးငွေ",
                 tbl_net: "လက်ကျန်လစာ (Net)",
                 tbl_status: "အခြေအနေ (Done / Off)",
                 tbl_total_present: "စုစုပေါင်း လာသည့်ရက်",
@@ -535,7 +526,7 @@
             let remainingAdvance = advance - repayment;
 
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
-            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, advance: remainingAdvance, repayment, netSalary };
+            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, totalAdvance: advance, remainingAdvance, repayment, netSalary };
 
             if(existingIndex >= 0) {
                 payrolls[existingIndex] = payrollData;
@@ -578,13 +569,16 @@
 
             let payHtml = '';
             let totalNet = 0;
-            let totalAdv = 0;
+            let totalAdvSum = 0;
 
             payrolls.forEach(p => {
                 const emp = employees.find(x => x.id == p.empId);
                 if(!emp) return;
                 totalNet += p.netSalary;
-                totalAdv += p.advance; // စုစုပေါင်း ကျန်ရှိချေးငွေများကို ပေါင်းမည်
+                totalAdvSum += (p.remainingAdvance !== undefined ? p.remainingAdvance : p.advance);
+
+                const tAdvance = (p.totalAdvance !== undefined ? p.totalAdvance : (p.remainingAdvance + p.repayment));
+                const rAdvance = (p.remainingAdvance !== undefined ? p.remainingAdvance : p.advance);
 
                 payHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
@@ -592,8 +586,9 @@
                     <td><span class="badge bg-info text-dark">${p.rating} / 5</span></td>
                     <td class="text-danger">-${p.deductions.toLocaleString()} ${curr}</td>
                     <td class="text-success fw-semibold">+${p.attendanceBonus.toLocaleString()} ${curr}</td>
-                    <td class="text-warning fw-semibold">-${p.advance.toLocaleString()} ${curr}</td>
+                    <td class="text-warning fw-semibold">-${tAdvance.toLocaleString()} ${curr}</td>
                     <td class="text-danger fw-semibold">-${p.repayment.toLocaleString()} ${curr}</td>
+                    <td class="text-warning fw-bold">-${rAdvance.toLocaleString()} ${curr}</td>
                     <td class="fw-bold text-success">${p.netSalary.toLocaleString()} ${curr}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-danger" onclick="deletePayroll(${p.empId})"><i class="fa-solid fa-trash"></i></button>
@@ -604,8 +599,7 @@
 
             document.getElementById('total-employees').innerText = employees.length;
             document.getElementById('total-net-salary').innerText = totalNet.toLocaleString() + ' ' + curr;
-            document.getElementById('total-advances').innerText = totalAdv.toLocaleString() + ' ' + curr;
-            document.getElementById('summary-total-advance').innerText = '-' + totalAdv.toLocaleString() + ' ' + curr;
+            document.getElementById('total-advances').innerText = totalAdvSum.toLocaleString() + ' ' + curr;
         }
 
         // Initialize App State
