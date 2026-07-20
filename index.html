@@ -35,12 +35,23 @@
         .form-control:focus, .form-select:focus { background-color: #0f172a; border-color: var(--accent-color); color: #fff; box-shadow: 0 0 0 0.25rem var(--accent-glow); }
         .form-control::placeholder { color: #64748b; }
         
-        /* Dark Tables & Fix Hover Text Contrast */
+        /* Dark Tables & Fix Text Contrast for All Table Data */
         .table { color: var(--text-primary); border-color: var(--border-color); }
         .table-dark { background-color: #090d16 !important; color: #fff; border-color: var(--border-color); }
-        .table-hover tbody tr { background-color: #1e293b; color: #f8fafc; }
-        .table-hover tbody tr:hover { background-color: #334155 !important; color: #ffffff !important; }
-        .table-hover tbody tr:hover td { color: #ffffff !important; }
+        
+        .table tbody tr {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+        }
+        .table tbody tr td {
+            color: #f8fafc !important;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #334155 !important;
+        }
+        .table-hover tbody tr:hover td {
+            color: #ffffff !important;
+        }
         
         .dropdown-menu { background-color: var(--card-bg); border: 1px solid var(--border-color); }
         .dropdown-item { color: var(--text-secondary); }
