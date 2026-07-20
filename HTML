@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal HR & Performance Management System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-users-gear me-2"></i>Internal HR & Payroll</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" href="#" onclick="switchTab('dashboard')" id="nav-dashboard"><i class="fa-solid fa-gauge me-1"></i> Dashboard</a>
+                <a class="nav-link" href="#" onclick="switchTab('employees')" id="nav-employees"><i class="fa-solid fa-user-group me-1"></i> Employees</a>
+                <a class="nav-link" href="#" onclick="switchTab('performance')" id="nav-performance"><i class="fa-solid fa-calculator me-1"></i> Performance & Salary</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- ================= 1. DASHBOARD TAB ================= -->
+        <div id="tab-dashboard" class="content-tab">
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-6">
+                    <h2><i class="fa-solid fa-gauge me-2"></i>Admin Dashboard</h2>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <input type="month" id="filterMonth" class="form-control d-inline-block w-auto" onchange="renderDashboard()">
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row text-white mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-primary p-3 shadow-sm border-0">
+                        <h5>Total Base Payroll</h5>
+                        <h3 id="lblTotalBase">0 MMK</h3>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-success p-3 shadow-sm border-0">
+                        <h5>Total Final Net Payout</h5>
+                        <h3 id="lblTotalNet">0 MMK</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Data Table -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Monthly Employee Salary & Performance Report</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-dark text-center">
+                            <tr>
+                                <th>Employee</th>
+                                <th>Base Salary</th>
+                                <th>Ratings (1-5)<br><small>Dis/Inter/Eng/Out</small></th>
+                                <th>Errors & Ded.</th>
+                                <th>Advance Repay</th>
+                                <th>Bonus</th>
+                                <th>Final Net Salary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardTableBody">
+                            <!-- JS will inject rows here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 2. EMPLOYEES TAB ================= -->
+        <div id="tab-employees" class="content-tab" style="display: none;">
+            <div class="row">
+                <!-- Add Employee Form -->
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm p-3 border-0">
+                        <h4 class="mb-3">Add New Employee</h4>
+                        <form id="employeeForm" onsubmit="saveEmployee(event)">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="empName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Position</label>
+                                <input type="text" id="empPosition" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Department</label>
+                                <input type="text" id="empDept" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Base Salary (MMK)</label>
+                                <input type="number" id="empSalary" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" id="empPhone" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100">Save Employee</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Employee List Table -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h4 class="mb-0">Employee Directory</h4>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Department</th>
+                                        <th>Base Salary</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody">
+                                    <!-- JS will inject rows here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 3. PERFORMANCE & SALARY TAB ================= -->
+        <div id="tab-performance" class="content-tab" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm p-4 border-0">
+                        <h2 class="mb-4">Monthly Performance & Salary Deduction Entry</h2>
+                        <form id="performanceForm" onsubmit="savePerformance(event)">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Select Employee</label>
+                                    <select id="perfEmployeeId" class="form-select" required>
+                                        <option value="">-- Choose Employee --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Month</label>
+                                    <input type="month" id="perfMonth" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h5 class="text-primary">1. Performance Ratings (1 to 5)</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Discipline</label>
+                                    <input type="number" id="perfDiscipline" min="1" max="5" value="3" class="form-control" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Interpersonal</label>
+                                    <input type="number" id="perfInterpersonal" min="1" max="5" value="3" class="form-control" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Engagement</label>
+                                    <input type="number" id="perfEngagement" min="1" max="5" value="3" class="form-control" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Output</label>
+                                    <input type="number" id="perfOutput" min="1" max="5" value="3" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h5 class="text-danger">2. Errors & Mistakes Tracking</h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Error Count</label>
+                                    <input type="number" id="perfErrorCount" value="0" class="form-control">
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">Error Description</label>
+                                    <input type="text" id="perfErrorDesc" placeholder="အမှားအယွင်း အကြောင်းအရာ" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-danger">Error Deduction Amount (MMK)</label>
+                                    <input type="number" id="perfErrorDed" value="0" class="form-control">
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h5 class="text-warning">3. Salary Advance / Loan Repayment System</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Total Advance Taken</label>
+                                    <input type="number" id="perfAdvTaken" value="0" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-warning">This Month Repayment</label>
+                                    <input type="number" id="perfAdvRepay" value="0" class="form-control">
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h5 class="text-success">4. Bonuses & Final Calculation</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Performance Bonus</label>
+                                    <input type="number" id="perfBonus" value="0" class="form-control">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 py-2 fs-5 mt-3">Calculate & Save Net Salary</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Initialize Default LocalStorage Data if empty
+        if (!localStorage.getItem('hr_employees')) {
+            localStorage.setItem('hr_employees', JSON.stringify([
+                { id: '1', name: 'Mg Mg', position: 'Developer', department: 'IT', baseSalary: 800000, phone: '09123456789' },
+                { id: '2', name: 'Su Su', position: 'HR Manager', department: 'HR', baseSalary: 700000, phone: '09987654321' }
+            ]));
+        }
+
+        if (!localStorage.getItem('hr_performances')) {
+            const currentMonthYear = new Date().toISOString().slice(0, 7);
+            localStorage.setItem('hr_performances', JSON.stringify([
+                { employeeId: '1', month: currentMonthYear, discipline: 4, interpersonal: 5, engagement: 4, output: 5, errorCount: 0, errorDescription: '', errorDeduction: 0, advanceTaken: 100000, advanceRepayment: 50000, bonus: 50000, netSalary: 800000 + 50000 - 0 - 50000 },
+                { employeeId: '2', month: currentMonthYear, discipline: 5, interpersonal: 4, engagement: 5, output: 4, errorCount: 1, errorDescription: 'Late report', errorDeduction: 20000, advanceTaken: 0, advanceRepayment: 0, bonus: 0, netSalary: 700000 + 0 - 20000 - 0 }
+            ]));
+        }
+
+        // Set default month in filter and forms
+        const currentMonthStr = new Date().toISOString().slice(0, 7);
+        document.getElementById('filterMonth').value = currentMonthStr;
+        document.getElementById('perfMonth').value = currentMonthStr;
+
+        // Tab Navigation Switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('.content-tab').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(el => el.classList.remove('active'));
+
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            document.getElementById('nav-' + tabName).classList.add('active');
+
+            if(tabName === 'dashboard') renderDashboard();
+            if(tabName === 'employees') renderEmployees();
+            if(tabName === 'performance') loadEmployeeDropdown();
+        }
+
+        // --- EMPLOYEE FUNCTIONS ---
+        function getEmployees() {
+            return JSON.parse(localStorage.getItem('hr_employees')) || [];
+        }
+
+        function renderEmployees() {
+            const employees = getEmployees();
+            let html = '';
+            if(employees.length === 0) {
+                html = '<tr><td colspan="4" class="text-center text-muted">No employees found.</td></tr>';
+            } else {
+                employees.forEach(emp => {
+                    html += `
+                        <tr>
+                            <td><strong>${emp.name}</strong></td>
+                            <td>${emp.position}</td>
+                            <td>${emp.department}</td>
+                            <td>${Number(emp.baseSalary).toLocaleString()} MMK</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('employeeTableBody').innerHTML = html;
+        }
+
+        function saveEmployee(e) {
+            e.preventDefault();
+            const employees = getEmployees();
+            const newEmp = {
+                id: Date.now().toString(),
+                name: document.getElementById('empName').value,
+                position: document.getElementById('empPosition').value,
+                department: document.getElementById('empDept').value,
+                baseSalary: parseFloat(document.getElementById('empSalary').value),
+                phone: document.getElementById('empPhone').value
+            };
+            employees.push(newEmp);
+            localStorage.setItem('hr_employees', JSON.stringify(employees));
+            document.getElementById('employeeForm').reset();
+            renderEmployees();
+            alert('Employee added successfully!');
+        }
+
+        // --- PERFORMANCE & SALARY FUNCTIONS ---
+        function loadEmployeeDropdown() {
+            const employees = getEmployees();
+            let options = '<option value="">-- Choose Employee --</option>';
+            employees.forEach(emp => {
+                options += `<option value="${emp.id}">${emp.name} (${emp.position})</option>`;
+            });
+            document.getElementById('perfEmployeeId').innerHTML = options;
+        }
+
+        function getPerformances() {
+            return JSON.parse(localStorage.getItem('hr_performances')) || [];
+        }
+
+        function savePerformance(e) {
+            e.preventDefault();
+            const empId = document.getElementById('perfEmployeeId').value;
+            const month = document.getElementById('perfMonth').value;
+            
+            const employees = getEmployees();
+            const emp = employees.find(el => el.id === empId);
+            if(!emp) return alert('Employee not found!');
+
+            const base = emp.baseSalary;
+            const errDed = parseFloat(document.getElementById('perfErrorDed').value) || 0;
+            const advRep = parseFloat(document.getElementById('perfAdvRepay').value) || 0;
+            const bonus = parseFloat(document.getElementById('perfBonus').value) || 0;
+
+            // Final Net Salary Formula: Base + Bonus - Error Deduction - Advance Repayment
+            const netSalary = base + bonus - errDed - advRep;
+
+            const perfData = {
+                employeeId: empId,
+                month: month,
+                discipline: parseInt(document.getElementById('perfDiscipline').value),
+                interpersonal: parseInt(document.getElementById('perfInterpersonal').value),
+                engagement: parseInt(document.getElementById('perfEngagement').value),
+                output: parseInt(document.getElementById('perfOutput').value),
+                errorCount: parseInt(document.getElementById('perfErrorCount').value) || 0,
+                errorDescription: document.getElementById('perfErrorDesc').value,
+                errorDeduction: errDed,
+                advanceTaken: parseFloat(document.getElementById('perfAdvTaken').value) || 0,
+                advanceRepayment: advRep,
+                bonus: bonus,
+                netSalary: netSalary
+            };
+
+            let performances = getPerformances();
+            // Remove existing record for same employee & month if exists, then push updated
+            performances = performances.filter(p => !(p.employeeId === empId && p.month === month));
+            performances.push(perfData);
+
+            localStorage.setItem('hr_performances', JSON.stringify(performances));
+            alert('Net salary calculated and saved successfully!');
+            document.getElementById('performanceForm').reset();
+            document.getElementById('perfMonth').value = currentMonthStr;
+            switchTab('dashboard');
+        }
+
+        // --- DASHBOARD RENDER ---
+        function renderDashboard() {
+            const selectedMonth = document.getElementById('filterMonth').value;
+            const performances = getPerformances().filter(p => p.month === selectedMonth);
+            const employees = getEmployees();
+
+            let totalBase = 0;
+            let totalNet = 0;
+            let html = '';
+
+            if(performances.length === 0) {
+                html = `<tr><td colspan="7" class="text-center text-muted py-4">No records found for ${selectedMonth}.</td></tr>`;
+            } else {
+                performances.forEach(p => {
+                    const emp = employees.find(e => e.id === p.employeeId);
+                    if(emp) {
+                        totalBase += emp.baseSalary;
+                        totalNet += p.netSalary;
+                        html += `
+                            <tr>
+                                <td>
+                                    <strong>${emp.name}</strong><br>
+                                    <small class="text-muted">${emp.position}</small>
+                                </td>
+                                <td class="text-end">${emp.baseSalary.toLocaleString()}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">${p.discipline}</span>
+                                    <span class="badge bg-secondary">${p.interpersonal}</span>
+                                    <span class="badge bg-secondary">${p.engagement}</span>
+                                    <span class="badge bg-secondary">${p.output}</span>
+                                </td>
+                                <td class="text-danger text-center">
+                                    ${p.errorCount} times<br>
+                                    <small>(-${p.errorDeduction.toLocaleString()})</small>
+                                </td>
+                                <td class="text-warning text-end fw-bold">
+                                    -${p.advanceRepayment.toLocaleString()}<br>
+                                    <small class="text-muted fw-normal">(Taken: ${p.advanceTaken.toLocaleString()})</small>
+                                </td>
+                                <td class="text-success text-end">+${p.bonus.toLocaleString()}</td>
+                                <td class="text-end fw-bold text-success fs-5">${p.netSalary.toLocaleString()} MMK</td>
+                            </tr>
+                        `;
+                    }
+                });
+            }
+
+            document.getElementById('dashboardTableBody').innerHTML = html;
+            document.getElementById('lblTotalBase').innerText = totalBase.toLocaleString() + ' MMK';
+            document.getElementById('lblTotalNet').innerText = totalNet.toLocaleString() + ' MMK';
+        }
+
+        // Initial Load on startup
+        renderDashboard();
+    </script>
+</body>
+</html>
