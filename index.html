@@ -17,7 +17,7 @@
         }
         body { background-color: var(--body-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; }
         .sidebar { min-height: 100vh; background: var(--sidebar-bg); color: #fff; box-shadow: 4px 0 10px rgba(0,0,0,0.05); }
-        .nav-link { color: #94a3b8; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; font-weight: 500; }
+        .nav-link { color: #94a3b8; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; font-weight: 500; cursor: pointer; }
         .nav-link:hover, .nav-link.active { color: #fff; background-color: var(--primary-color); transform: translateX(4px); }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s; }
         .card:hover { transform: translateY(-2px); }
@@ -25,6 +25,7 @@
         .btn-primary:hover { background-color: #4f46e5; }
         .table-responsive { border-radius: 12px; overflow: hidden; }
         .top-navbar { background: #fff; border-bottom: 1px solid #e2e8f0; border-radius: 12px; }
+        .attendance-btn { min-width: 75px; font-weight: 600; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -38,17 +39,22 @@
                 </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="switchTab('dashboard')" id="nav-dashboard">
+                        <a class="nav-link active" onclick="switchTab('dashboard')" id="nav-dashboard">
                             <i class="fa-solid fa-chart-pie me-2"></i> <span data-i18n="menu_dashboard">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="switchTab('employees')" id="nav-employees">
+                        <a class="nav-link" onclick="switchTab('employees')" id="nav-employees">
                             <i class="fa-solid fa-users me-2"></i> <span data-i18n="menu_employees">Employees</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="switchTab('performance')" id="nav-performance">
+                        <a class="nav-link" onclick="switchTab('attendance')" id="nav-attendance">
+                            <i class="fa-solid fa-calendar-check me-2"></i> <span data-i18n="menu_attendance">Daily Attendance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('performance')" id="nav-performance">
                             <i class="fa-solid fa-file-invoice-dollar me-2"></i> <span data-i18n="menu_performance">Performance & Salary</span>
                         </a>
                     </li>
@@ -156,7 +162,38 @@
                     </div>
                 </div>
 
-                <!-- 3. PERFORMANCE & SALARY TAB -->
+                <!-- 3. DAILY ATTENDANCE TAB (NEW) -->
+                <div id="tab-attendance" class="content-tab" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
+                        <h2 class="h3 fw-bold text-dark"><i class="fa-solid fa-calendar-check me-2 text-primary"></i><span data-i18n="menu_attendance">Daily Attendance Management</span></h2>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="fw-bold text-secondary" data-i18n="lbl_select_date">Select Date:</label>
+                            <input type="date" id="attendance-date" class="form-control" onchange="loadAttendanceForDate()">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="ps-4" data-i18n="tbl_name">Name</th>
+                                            <th data-i18n="tbl_position">Position</th>
+                                            <th data-i18n="tbl_status">Status (Done / Off)</th>
+                                            <th data-i18n="tbl_total_present">Total Present</th>
+                                            <th class="pe-4" data-i18n="tbl_total_absent">Total Absent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendance-table-body">
+                                        <!-- Dynamic Attendance Data -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PERFORMANCE & SALARY TAB -->
                 <div id="tab-performance" class="content-tab" style="display:none;">
                     <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
                         <h2 class="h3 fw-bold text-dark"><i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i><span data-i18n="menu_performance">Performance & Salary Calculations</span></h2>
@@ -167,7 +204,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_select_emp">Select Employee</label>
-                                        <select class="form-select" id="pay-emp-id" required>
+                                        <select class="form-select" id="pay-emp-id" onchange="onPayrollEmpSelected()" required>
                                             <option value="">Choose...</option>
                                         </select>
                                     </div>
@@ -181,7 +218,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_absence">Total Leave/Absent Days</label>
-                                        <input type="number" min="0" class="form-control" id="pay-absence" value="0" required>
+                                        <input type="number" min="0" class="form-control" id="pay-absence" value="0" readonly required>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_attendance_bonus">Attendance Bonus Amount (Ks)</label>
@@ -242,6 +279,7 @@
             en: {
                 menu_dashboard: "Dashboard Overview",
                 menu_employees: "Employee Directory",
+                menu_attendance: "Daily Attendance",
                 menu_performance: "Performance & Salary",
                 lbl_total_emp: "Total Employees",
                 lbl_total_net: "Total Net Salary Paid",
@@ -268,11 +306,16 @@
                 tbl_adv: "Advance",
                 tbl_repay: "Repayment",
                 tbl_net: "Net Salary",
+                tbl_status: "Status (Done / Off)",
+                tbl_total_present: "Total Present",
+                tbl_total_absent: "Total Absent",
+                lbl_select_date: "Select Date:",
                 currency: "Ks"
             },
             my: {
                 menu_dashboard: "ပင်မစာမျက်နှာ (Dashboard)",
                 menu_employees: "ဝန်ထမ်းစာရင်းများ",
+                menu_attendance: "နေ့စဉ် တက်ရောက်မှု",
                 menu_performance: "စွမ်းဆောင်ရည်နှင့် လစာ",
                 lbl_total_emp: "စုစုပေါင်း ဝန်ထမ်းဦးရေ",
                 lbl_total_net: "ပေးချေပြီး စုစုပေါင်း သက်သာလစာ",
@@ -299,6 +342,10 @@
                 tbl_adv: "ချေးငွေ",
                 tbl_repay: "ပြန်ဆပ်ငွေ",
                 tbl_net: "လက်ကျန်လစာ (Net)",
+                tbl_status: "အခြေအနေ (Done / Off)",
+                tbl_total_present: "စုစုပေါင်း လာသည့်ရက်",
+                tbl_total_absent: "စုစုပေါင်း ပျက်သည့်ရက်",
+                lbl_select_date: "ရက်စွဲရွေးရန်:",
                 currency: "ကျပ်"
             }
         };
@@ -331,10 +378,17 @@
 
         let employees = JSON.parse(localStorage.getItem('hr_employees')) || [];
         let payrolls = JSON.parse(localStorage.getItem('hr_payrolls')) || [];
+        let attendanceRecords = JSON.parse(localStorage.getItem('hr_attendance')) || {}; 
+        // Format of attendanceRecords: { "YYYY-MM-DD": { empId: "done" or "off", ... }, ... }
+
+        // Set default date input to today
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('attendance-date').value = todayStr;
 
         function saveData() {
             localStorage.setItem('hr_employees', JSON.stringify(employees));
             localStorage.setItem('hr_payrolls', JSON.stringify(payrolls));
+            localStorage.setItem('hr_attendance', JSON.stringify(attendanceRecords));
             renderAll();
         }
 
@@ -376,6 +430,79 @@
             }
         }
 
+        function toggleAttendance(empId) {
+            const dateStr = document.getElementById('attendance-date').value;
+            if(!dateStr) return;
+
+            if(!attendanceRecords[dateStr]) {
+                attendanceRecords[dateStr] = {};
+            }
+
+            // Toggle current status (default to 'done' if not set, or switch between done/off)
+            const currentStatus = attendanceRecords[dateStr][empId] || 'done';
+            attendanceRecords[dateStr][empId] = (currentStatus === 'done') ? 'off' : 'done';
+
+            saveData();
+        }
+
+        function calculateTotals(empId) {
+            let presentCount = 0;
+            let absentCount = 0;
+
+            for(let date in attendanceRecords) {
+                const status = attendanceRecords[date][empId];
+                if(status === 'done') {
+                    presentCount++;
+                } else if(status === 'off') {
+                    absentCount++;
+                }
+            }
+            return { presentCount, absentCount };
+        }
+
+        function loadAttendanceForDate() {
+            renderAttendanceTable();
+        }
+
+        function renderAttendanceTable() {
+            const dateStr = document.getElementById('attendance-date').value;
+            if(!attendanceRecords[dateStr]) {
+                attendanceRecords[dateStr] = {};
+            }
+
+            let attHtml = '';
+            employees.forEach(emp => {
+                const status = attendanceRecords[dateStr][emp.id] || 'done'; // default done
+                attendanceRecords[dateStr][emp.id] = status;
+
+                const totals = calculateTotals(emp.id);
+
+                const btnClass = (status === 'done') ? 'btn-success' : 'btn-danger';
+                const btnText = (status === 'done') ? 'Done' : 'Off';
+
+                attHtml += `<tr>
+                    <td class="ps-4"><strong>${emp.name}</strong></td>
+                    <td>${emp.position}</td>
+                    <td>
+                        <button class="btn btn-sm ${btnClass} attendance-btn" onclick="toggleAttendance(${emp.id})">${btnText}</button>
+                    </td>
+                    <td><span class="badge bg-success">${totals.presentCount} Days</span></td>
+                    <td class="pe-4"><span class="badge bg-danger">${totals.absentCount} Days</span></td>
+                </tr>`;
+            });
+            document.getElementById('attendance-table-body').innerHTML = attHtml;
+        }
+
+        function onPayrollEmpSelected() {
+            const empId = document.getElementById('pay-emp-id').value;
+            if(!empId) {
+                document.getElementById('pay-absence').value = 0;
+                return;
+            }
+            const totals = calculateTotals(empId);
+            document.getElementById('pay-absence').value = totals.absentCount;
+        }
+
         function savePayroll(e) {
             e.preventDefault();
             const empId = document.getElementById('pay-emp-id').value;
@@ -408,6 +535,7 @@
             }
 
             document.getElementById('payroll-form').reset();
+            document.getElementById('pay-absence').value = 0;
             saveData();
         }
 
@@ -436,6 +564,8 @@
             });
             document.getElementById('employee-table-body').innerHTML = empHtml;
             document.getElementById('pay-emp-id').innerHTML = selectHtml;
+
+            renderAttendanceTable();
 
             let payHtml = '';
             let totalNet = 0;
