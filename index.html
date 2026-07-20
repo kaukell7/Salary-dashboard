@@ -373,6 +373,7 @@
             if(rating === 5) bonus = emp.baseSalary * 0.10;
             else if(rating === 1) bonus = -(emp.baseSalary * 0.10);
 
+            // ပြင်ဆင်လိုက်သော တွက်ချက်မှုပုံစံ (Advance ကို နုတ်ပြီး Repayment ကို ပြန်ဆပ်/ပေါင်းထည့်သည်)
             let netSalary = emp.baseSalary + bonus - deductions - advance + repayment;
 
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
