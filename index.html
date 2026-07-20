@@ -240,6 +240,16 @@
                         </div>
                     </div>
 
+                    <!-- Total Summary Bar for Advances -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card bg-light border p-3">
+                                <span class="text-muted small fw-bold text-uppercase" data-i18n="lbl_total_adv_sum">Total Outstanding Advance Balance</span>
+                                <h4 id="summary-total-advance" class="fw-bold text-danger m-0 mt-1">0 Ks</h4>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -284,6 +294,7 @@
                 lbl_total_emp: "Total Employees",
                 lbl_total_net: "Total Net Salary Paid",
                 lbl_total_adv: "Total Advances Outstanding",
+                lbl_total_adv_sum: "Total Outstanding Advance Balance",
                 lbl_emp_name: "Employee Name",
                 lbl_emp_position: "Position",
                 lbl_emp_salary: "Base Salary (Ks)",
@@ -320,6 +331,7 @@
                 lbl_total_emp: "စုစုပေါင်း ဝန်ထမ်းဦးရေ",
                 lbl_total_net: "ပေးချေပြီး စုစုပေါင်း သက်သာလစာ",
                 lbl_total_adv: "ထုတ်ယူထားဆဲ ချေးငွေစုစုပေါင်း",
+                lbl_total_adv_sum: "စုစုပေါင်း ကျန်ရှိချေးငွေလက်ကျန်",
                 lbl_emp_name: "ဝန်ထမ်းအမည်",
                 lbl_emp_position: "ရာထူး",
                 lbl_emp_salary: "အခြေခံလစာ (ကျပ်)",
@@ -519,10 +531,7 @@
 
             let attendanceBonus = (absenceDays <= 2) ? baseAttBonus : 0;
 
-            // Net Salary တွက်ချက်ခြင်း (လစာထဲမှ Advance ယူငွေနှုတ်ပြီး၊ Repayment ပြန်ဆပ်ငွေကို ပေါင်းထည့်သည်)
             let netSalary = emp.baseSalary + bonus + attendanceBonus - deductions - advance + repayment;
-
-            // နောက်လကျန်ရှိမည့် ချေးငွေလက်ကျန် (Remaining Advance Balance) = ယူထားသောငွေ (advance) - ပြန်ဆပ်ငွေ (repayment)
             let remainingAdvance = advance - repayment;
 
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
@@ -575,7 +584,7 @@
                 const emp = employees.find(x => x.id == p.empId);
                 if(!emp) return;
                 totalNet += p.netSalary;
-                totalAdv += Math.abs(p.advance);
+                totalAdv += p.advance; // စုစုပေါင်း ကျန်ရှိချေးငွေများကို ပေါင်းမည်
 
                 payHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
@@ -596,6 +605,7 @@
             document.getElementById('total-employees').innerText = employees.length;
             document.getElementById('total-net-salary').innerText = totalNet.toLocaleString() + ' ' + curr;
             document.getElementById('total-advances').innerText = totalAdv.toLocaleString() + ' ' + curr;
+            document.getElementById('summary-total-advance').innerText = '-' + totalAdv.toLocaleString() + ' ' + curr;
         }
 
         // Initialize App State
