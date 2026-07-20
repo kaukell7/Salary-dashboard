@@ -121,15 +121,19 @@
                             <form id="employee-form" onsubmit="saveEmployee(event)">
                                 <input type="hidden" id="emp-id">
                                 <div class="row g-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_emp_name">Employee Name</label>
                                         <input type="text" class="form-control" id="emp-name" required placeholder="Enter name">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-secondary" data-i18n="lbl_emp_phone">Phone Number</label>
+                                        <input type="text" class="form-control" id="emp-phone" placeholder="Enter phone">
+                                    </div>
+                                    <div class="col-md-3">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_emp_position">Position</label>
                                         <input type="text" class="form-control" id="emp-position" required placeholder="Enter position">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="form-label fw-bold text-secondary" data-i18n="lbl_emp_salary">Base Salary (Ks)</label>
                                         <input type="number" class="form-control" id="emp-base-salary" required placeholder="0">
                                     </div>
@@ -148,6 +152,7 @@
                                     <thead class="table-dark">
                                         <tr>
                                             <th class="ps-4" data-i18n="tbl_name">Name</th>
+                                            <th data-i18n="tbl_phone">Phone Number</th>
                                             <th data-i18n="tbl_position">Position</th>
                                             <th data-i18n="tbl_base">Base Salary</th>
                                             <th class="text-end pe-4" data-i18n="tbl_actions">Actions</th>
@@ -178,6 +183,7 @@
                                     <thead class="table-dark">
                                         <tr>
                                             <th class="ps-4" data-i18n="tbl_name">Name</th>
+                                            <th data-i18n="tbl_phone">Phone Number</th>
                                             <th data-i18n="tbl_position">Position</th>
                                             <th data-i18n="tbl_status">Status (Done / Off)</th>
                                             <th data-i18n="tbl_total_present">Total Present</th>
@@ -286,10 +292,12 @@
                 lbl_total_net: "Total Net Salary Paid",
                 lbl_total_adv: "Total Advances Outstanding",
                 lbl_emp_name: "Employee Name",
+                lbl_emp_phone: "Phone Number",
                 lbl_emp_position: "Position",
                 lbl_emp_salary: "Base Salary (Ks)",
                 btn_save_emp: "Save Employee",
                 tbl_name: "Name",
+                tbl_phone: "Phone Number",
                 tbl_position: "Position",
                 tbl_base: "Base Salary",
                 tbl_actions: "Actions",
@@ -323,10 +331,12 @@
                 lbl_total_net: "ပေးချေပြီး စုစုပေါင်း သက်သာလစာ",
                 lbl_total_adv: "ထုတ်ယူထားဆဲ ချေးငွေစုစုပေါင်း",
                 lbl_emp_name: "ဝန်ထမ်းအမည်",
+                lbl_emp_phone: "ဖုန်းနံပါတ်",
                 lbl_emp_position: "ရာထူး",
                 lbl_emp_salary: "အခြေခံလစာ (ကျပ်)",
                 btn_save_emp: "သိမ်းဆည်းမည်",
                 tbl_name: "အမည်",
+                tbl_phone: "ဖုန်းနံပါတ်",
                 tbl_position: "ရာထူး",
                 tbl_base: "အခြေခံလစာ",
                 tbl_actions: "လုပ်ဆောင်ချက်",
@@ -397,16 +407,18 @@
             e.preventDefault();
             const id = document.getElementById('emp-id').value;
             const name = document.getElementById('emp-name').value;
+            const phone = document.getElementById('emp-phone').value;
             const position = document.getElementById('emp-position').value;
             const baseSalary = parseFloat(document.getElementById('emp-base-salary').value);
 
             if(id) {
                 const emp = employees.find(x => x.id == id);
                 emp.name = name;
+                emp.phone = phone;
                 emp.position = position;
                 emp.baseSalary = baseSalary;
             } else {
-                employees.push({ id: Date.now(), name, position, baseSalary });
+                employees.push({ id: Date.now(), name, phone, position, baseSalary });
             }
 
             document.getElementById('employee-form').reset();
@@ -418,6 +430,7 @@
             const emp = employees.find(x => x.id == id);
             document.getElementById('emp-id').value = emp.id;
             document.getElementById('emp-name').value = emp.name;
+            document.getElementById('emp-phone').value = emp.phone || '';
             document.getElementById('emp-position').value = emp.position;
             document.getElementById('emp-base-salary').value = emp.baseSalary;
         }
@@ -482,6 +495,7 @@
 
                 attHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
+                    <td>${emp.phone ? emp.phone : '-'}</td>
                     <td>${emp.position}</td>
                     <td>
                         <button class="btn btn-sm ${btnClass} attendance-btn" onclick="toggleAttendance(${emp.id})">${btnText}</button>
@@ -553,6 +567,7 @@
             employees.forEach(emp => {
                 empHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
+                    <td>${emp.phone ? emp.phone : '-'}</td>
                     <td>${emp.position}</td>
                     <td>${emp.baseSalary.toLocaleString()} ${curr}</td>
                     <td class="text-end pe-4">
