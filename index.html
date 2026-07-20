@@ -422,6 +422,11 @@
             
             document.getElementById('tab-' + tabId).style.display = 'block';
             document.getElementById('nav-' + tabId).classList.add('active');
+            
+            if(tabId === 'dashboard') renderDashboard();
+            if(tabId === 'employees') renderEmployeeTable();
+            if(tabId === 'attendance') renderAttendanceTable();
+            if(tabId === 'performance') renderPayrollTable();
         }
 
         let employees = JSON.parse(localStorage.getItem('hr_employees')) || [];
@@ -436,6 +441,15 @@
             localStorage.setItem('hr_payrolls', JSON.stringify(payrolls));
             localStorage.setItem('hr_attendance', JSON.stringify(attendanceRecords));
             renderAll();
+        }
+
+        function renderAll() {
+            updateTexts();
+            renderEmployeeTable();
+            renderAttendanceTable();
+            renderPayrollSelect();
+            renderPayrollTable();
+            renderDashboard();
         }
 
         function saveEmployee(e) {
@@ -477,6 +491,23 @@
                 payrolls = payrolls.filter(x => x.empId != id);
                 saveData();
             }
+        }
+
+        function renderEmployeeTable() {
+            let html = '';
+            employees.forEach(emp => {
+                html += `<tr>
+                    <td class="ps-4"><strong>${emp.name}</strong></td>
+                    <td>${emp.phone || '-'}</td>
+                    <td>${emp.position}</td>
+                    <td>${emp.baseSalary.toLocaleString()} Ks</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editEmployee(${emp.id})"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEmployee(${emp.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('employee-table-body').innerHTML = html;
         }
 
         function toggleAttendance(empId) {
@@ -529,9 +560,9 @@
                 const btnText = (status === 'done') ? 'Done' : 'Off';
 
                 attHtml += `<tr>
-                    <td class="ps-4 text-white"><strong>${emp.name}</strong></td>
-                    <td class="text-secondary">${emp.phone ? emp.phone : '-'}</td>
-                    <td class="text-secondary">${emp.position}</td>
+                    <td class="ps-4"><strong>${emp.name}</strong></td>
+                    <td>${emp.phone || '-'}</td>
+                    <td>${emp.position}</td>
                     <td>
                         <button class="btn btn-sm ${btnClass} attendance-btn shadow-sm" onclick="toggleAttendance(${emp.id})">${btnText}</button>
                     </td>
@@ -540,6 +571,14 @@
                 </tr>`;
             });
             document.getElementById('attendance-table-body').innerHTML = attHtml;
+        }
+
+        function renderPayrollSelect() {
+            let options = '<option value="">Choose...</option>';
+            employees.forEach(emp => {
+                options += `<option value="${emp.id}">${emp.name} (${emp.position})</option>`;
+            });
+            document.getElementById('pay-emp-id').innerHTML = options;
         }
 
         function onPayrollEmpSelected() {
@@ -565,19 +604,25 @@
             const emp = employees.find(x => x.id == empId);
             if(!emp) return;
 
-            let bonus = 0;
-            if(rating === 5) bonus = emp.baseSalary * 0.10;
-            else if(rating === 1) bonus = -(emp.baseSalary * 0.10);
-
-            let attendanceBonus = (absenceDays <= 2) ? baseAttBonus : 0;
-
-            let netSalary = emp.baseSalary + bonus + attendanceBonus - deductions - repayment;
-            let remainingAdvance = totalAdvance - repayment;
+            let attBonus = (absenceDays === 0) ? baseAttBonus : 0;
+            let remainingBalance = totalAdvance - repayment;
+            let netSalary = emp.baseSalary + attBonus - deductions - repayment;
 
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
-            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, totalAdvance, remainingAdvance, repayment, netSalary };
+            const payrollData = {
+                empId,
+                name: emp.name,
+                baseSalary: emp.baseSalary,
+                rating,
+                deductions,
+                attBonus,
+                totalAdvance,
+                repayment,
+                remainingBalance,
+                netSalary
+            };
 
-            if(existingIndex >= 0) {
+            if(existingIndex > -1) {
                 payrolls[existingIndex] = payrollData;
             } else {
                 payrolls.push(payrollData);
@@ -593,67 +638,40 @@
             saveData();
         }
 
-        function renderAll() {
-            const curr = translations[currentLang].currency;
-            
-            let empHtml = '';
-            let selectHtml = `<option value="">${currentLang === 'my' ? 'ရွေးချယ်ပါ...' : 'Choose...'}</option>`;
-            
-            employees.forEach(emp => {
-                empHtml += `<tr>
-                    <td class="ps-4 text-white"><strong>${emp.name}</strong></td>
-                    <td class="text-secondary">${emp.phone ? emp.phone : '-'}</td>
-                    <td class="text-secondary">${emp.position}</td>
-                    <td class="text-white">${emp.baseSalary.toLocaleString()} ${curr}</td>
-                    <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-light me-1 border-secondary" onclick="editEmployee(${emp.id})"><i class="fa-solid fa-pen text-info"></i></button>
-                        <button class="btn btn-sm btn-outline-light border-secondary" onclick="deleteEmployee(${emp.id})"><i class="fa-solid fa-trash text-danger"></i></button>
-                    </td>
-                </tr>`;
-                selectHtml += `<option value="${emp.id}">${emp.name} (${emp.position})</option>`;
-            });
-            document.getElementById('employee-table-body').innerHTML = empHtml;
-            document.getElementById('pay-emp-id').innerHTML = selectHtml;
-
-            renderAttendanceTable();
-
-            let payHtml = '';
-            let totalNet = 0;
-            let totalAdvSum = 0;
-
+        function renderPayrollTable() {
+            let html = '';
             payrolls.forEach(p => {
-                const emp = employees.find(x => x.id == p.empId);
-                if(!emp) return;
-                totalNet += p.netSalary;
-                totalAdvSum += (p.remainingAdvance !== undefined ? p.remainingAdvance : p.totalAdvance);
-
-                const tAdvance = (p.totalAdvance !== undefined ? p.totalAdvance : 0);
-                const rAdvance = (p.remainingAdvance !== undefined ? p.remainingAdvance : tAdvance);
-
-                payHtml += `<tr>
-                    <td class="ps-4 text-white"><strong>${emp.name}</strong></td>
-                    <td class="text-white">${emp.baseSalary.toLocaleString()} ${curr}</td>
-                    <td><span class="badge bg-dark border border-secondary text-info">${p.rating} / 5</span></td>
-                    <td class="text-danger fw-semibold">${p.deductions.toLocaleString()} ${curr}</td>
-                    <td class="text-success fw-semibold">${p.attendanceBonus.toLocaleString()} ${curr}</td>
-                    <td class="text-warning fw-semibold">${tAdvance.toLocaleString()} ${curr}</td>
-                    <td class="text-secondary fw-semibold">${p.repayment.toLocaleString()} ${curr}</td>
-                    <td class="text-warning fw-bold">${rAdvance.toLocaleString()} ${curr}</td>
-                    <td><strong class="text-success fs-6">${p.netSalary.toLocaleString()} ${curr}</strong></td>
+                html += `<tr>
+                    <td class="ps-4"><strong>${p.name}</strong></td>
+                    <td>${p.baseSalary.toLocaleString()}</td>
+                    <td><span class="badge bg-info">${p.rating} / 5</span></td>
+                    <td class="text-danger">-${p.deductions.toLocaleString()}</td>
+                    <td class="text-success">+${p.attBonus.toLocaleString()}</td>
+                    <td>${p.totalAdvance.toLocaleString()}</td>
+                    <td>${p.repayment.toLocaleString()}</td>
+                    <td>${p.remainingBalance.toLocaleString()}</td>
+                    <td class="fw-bold text-success">${p.netSalary.toLocaleString()} Ks</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-light border-secondary" onclick="deletePayroll(${p.empId})"><i class="fa-solid fa-trash text-danger"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePayroll(${p.empId})"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
+            document.getElementById('payroll-table-body').innerHTML = html;
+        }
 
-            document.getElementById('payroll-table-body').innerHTML = payHtml;
+        function renderDashboard() {
             document.getElementById('total-employees').innerText = employees.length;
-            document.getElementById('total-net-salary').innerText = totalNet.toLocaleString() + ' ' + curr;
-            document.getElementById('total-advances').innerText = totalAdvSum.toLocaleString() + ' ' + curr;
+
+            let totalNet = 0;
+            payrolls.forEach(p => totalNet += p.netSalary);
+            document.getElementById('total-net-salary').innerText = totalNet.toLocaleString() + ' Ks';
+
+            let totalAdv = 0;
+            payrolls.forEach(p => totalAdv += p.remainingBalance);
+            document.getElementById('total-advances').innerText = totalAdv.toLocaleString() + ' Ks';
         }
 
         // Initialize on load
-        updateTexts();
         renderAll();
     </script>
 </body>
