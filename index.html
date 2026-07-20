@@ -586,27 +586,26 @@
                 payHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
                     <td>${emp.baseSalary.toLocaleString()} ${curr}</td>
-                    <td><span class="badge bg-info text-dark">${p.rating} / 5</span></td>
-                    <td class="text-danger">-${p.deductions.toLocaleString()} ${curr}</td>
-                    <td class="text-success fw-semibold">+${p.attendanceBonus.toLocaleString()} ${curr}</td>
-                    <td class="text-warning fw-semibold">-${tAdvance.toLocaleString()} ${curr}</td>
-                    <td class="text-danger fw-semibold">-${p.repayment.toLocaleString()} ${curr}</td>
-                    <td class="text-warning fw-bold">-${rAdvance.toLocaleString()} ${curr}</td>
-                    <td class="fw-bold text-success">${p.netSalary.toLocaleString()} ${curr}</td>
+                    <td><span class="badge bg-secondary">${p.rating} / 5</span></td>
+                    <td>${p.deductions.toLocaleString()} ${curr}</td>
+                    <td>${p.attendanceBonus.toLocaleString()} ${curr}</td>
+                    <td>${tAdvance.toLocaleString()} ${curr}</td>
+                    <td>${p.repayment.toLocaleString()} ${curr}</td>
+                    <td>${rAdvance.toLocaleString()} ${curr}</td>
+                    <td><strong class="text-success">${p.netSalary.toLocaleString()} ${curr}</strong></td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-danger" onclick="deletePayroll(${p.empId})"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
-            document.getElementById('payroll-table-body').innerHTML = payHtml;
 
+            document.getElementById('payroll-table-body').innerHTML = payHtml;
             document.getElementById('total-employees').innerText = employees.length;
             document.getElementById('total-net-salary').innerText = totalNet.toLocaleString() + ' ' + curr;
             document.getElementById('total-advances').innerText = totalAdvSum.toLocaleString() + ' ' + curr;
         }
 
-        // Initialize App State
-        document.getElementById('current-lang-text').innerText = (currentLang === 'en') ? 'English' : 'မြန်မာ';
+        // Initialize on load
         updateTexts();
         renderAll();
     </script>
