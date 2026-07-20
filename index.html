@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="my" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR & Payroll Management System - Dark Edition</title>
+    <title>HR & Payroll Management System</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
+        /* Light & Dark Theme Variables */
+        :root[data-bs-theme="dark"] {
             --sidebar-bg: #090d16;
             --body-bg: #0f172a;
             --card-bg: #1e293b;
@@ -18,43 +19,55 @@
             --accent-color: #6366f1;
             --accent-glow: rgba(99, 102, 241, 0.3);
             --border-color: #334155;
+            --table-row-bg: #1e293b;
+            --table-hover-bg: #334155;
+            --form-input-bg: #0f172a;
         }
-        body { background-color: var(--body-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text-primary); }
+
+        :root[data-bs-theme="light"] {
+            --sidebar-bg: #f8fafc;
+            --body-bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent-color: #4f46e5;
+            --accent-glow: rgba(79, 70, 229, 0.2);
+            --border-color: #e2e8f0;
+            --table-row-bg: #ffffff;
+            --table-hover-bg: #f8fafc;
+            --form-input-bg: #f8fafc;
+        }
+
+        body { background-color: var(--body-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text-primary); transition: background-color 0.3s, color 0.3s; }
         .sidebar { min-height: 100vh; background: var(--sidebar-bg); color: var(--text-primary); border-right: 1px solid var(--border-color); }
         .nav-link { color: var(--text-secondary); border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; font-weight: 500; cursor: pointer; }
         .nav-link:hover, .nav-link.active { color: #fff; background-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-glow); transform: translateX(4px); }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); color: var(--text-primary); transition: transform 0.2s; }
-        .card:hover { border-color: #475569; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); color: var(--text-primary); }
         .btn-primary { background-color: var(--accent-color); border: none; border-radius: 8px; box-shadow: 0 4px 12px var(--accent-glow); }
-        .btn-primary:hover { background-color: #4f46e5; }
         .table-responsive { border-radius: 12px; overflow: hidden; }
         .top-navbar { background: var(--card-bg); border-bottom: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); }
         
-        /* Dark Form Controls */
-        .form-control, .form-select { background-color: #0f172a; border: 1px solid var(--border-color); color: #fff; border-radius: 8px; }
-        .form-control:focus, .form-select:focus { background-color: #0f172a; border-color: var(--accent-color); color: #fff; box-shadow: 0 0 0 0.25rem var(--accent-glow); }
-        .form-control::placeholder { color: #64748b; }
+        /* Form Controls */
+        .form-control, .form-select { background-color: var(--form-input-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; }
+        .form-control:focus, .form-select:focus { background-color: var(--form-input-bg); border-color: var(--accent-color); color: var(--text-primary); box-shadow: 0 0 0 0.25rem var(--accent-glow); }
         
-        /* Dark Tables & Fix Text Contrast for All Table Data (Forced Solid Dark Background & White Text) */
-        .table { color: #ffffff !important; border-color: var(--border-color); }
-        .table-dark { background-color: #090d16 !important; color: #ffffff; border-color: var(--border-color); }
+        /* Tables */
+        .table { color: var(--text-primary) !important; border-color: var(--border-color); }
+        .table-dark { background-color: var(--sidebar-bg) !important; color: var(--text-primary); border-color: var(--border-color); }
         
         .table tbody tr {
-            background-color: #1e293b !important;
-            color: #ffffff !important;
+            background-color: var(--table-row-bg) !important;
+            color: var(--text-primary) !important;
         }
         .table tbody tr td, 
         .table tbody tr td span, 
         .table tbody tr td strong,
         .table tbody tr td div {
-            color: #ffffff !important;
+            color: var(--text-primary) !important;
         }
         
         .table-hover tbody tr:hover {
-            background-color: #334155 !important;
-        }
-        .table-hover tbody tr:hover td {
-            color: #ffffff !important;
+            background-color: var(--table-hover-bg) !important;
         }
         
         .dropdown-menu { background-color: var(--card-bg); border: 1px solid var(--border-color); }
@@ -70,7 +83,7 @@
             <!-- Sidebar Navigation -->
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
                 <div class="text-center py-4 border-bottom border-secondary mb-4">
-                    <h4 class="text-white fw-bold m-0"><i class="fa-solid fa-shield-halved text-indigo me-2" style="color: var(--accent-color);"></i>HR Core</h4>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-shield-halved me-2" style="color: var(--accent-color);"></i>HR Core</h4>
                 </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
@@ -99,47 +112,55 @@
             <!-- Main Content Area -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
                 
-                <!-- Top Bar with Language Switcher -->
+                <!-- Top Bar with Theme Toggle & Language Switcher -->
                 <div class="top-navbar d-flex justify-content-between align-items-center px-4 py-3 mb-4 shadow">
-                    <h5 class="m-0 fw-bold text-white" id="page-title-header">Dashboard Overview</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold border-secondary" type="button" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-globe me-1"></i> <span id="current-lang-text">English</span>
+                    <h5 class="m-0 fw-bold" id="page-title-header">Dashboard Overview</h5>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Theme Toggle Button -->
+                        <button class="btn btn-outline-secondary btn-sm fw-bold px-3 py-2 rounded-pill" onclick="toggleTheme()" id="theme-toggle-btn">
+                            <i class="fa-solid fa-moon me-1" id="theme-icon"></i> <span id="theme-text">Dark Mode</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('my')">မြန်မာ (Myanmar)</a></li>
-                        </ul>
+
+                        <!-- Language Switcher Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-globe me-1"></i> <span id="current-lang-text">English</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="changeLanguage('my')">မြန်မာ (Myanmar)</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 1. DASHBOARD TAB -->
                 <div id="tab-dashboard" class="content-tab">
-                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom border-secondary">
-                        <h2 class="h3 fw-bold text-white"><i class="fa-solid fa-chart-pie me-2 text-indigo" style="color: var(--accent-color);"></i><span data-i18n="menu_dashboard">Dashboard Overview</span></h2>
+                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
+                        <h2 class="h3 fw-bold"><i class="fa-solid fa-chart-pie me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_dashboard">Dashboard Overview</span></h2>
                     </div>
                     <div class="row g-4">
                         <div class="col-md-4">
-                            <div class="card text-white p-3 shadow" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #4338ca;">
+                            <div class="card p-3 shadow">
                                 <div class="card-body">
-                                    <h6 class="card-title text-uppercase fw-bold text-indigo-200 opacity-75" data-i18n="lbl_total_emp">Total Employees</h6>
-                                    <h2 id="total-employees" class="display-5 fw-bold mt-2 text-white">0</h2>
+                                    <h6 class="card-title text-uppercase fw-bold opacity-75" data-i18n="lbl_total_emp">Total Employees</h6>
+                                    <h2 id="total-employees" class="display-5 fw-bold mt-2">0</h2>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card text-white p-3 shadow" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); border: 1px solid #047857;">
+                            <div class="card p-3 shadow">
                                 <div class="card-body">
                                     <h6 class="card-title text-uppercase fw-bold opacity-75" data-i18n="lbl_total_net">Total Net Salary Paid</h6>
-                                    <h2 id="total-net-salary" class="display-5 fw-bold mt-2 text-white">0 Ks</h2>
+                                    <h2 id="total-net-salary" class="display-5 fw-bold mt-2 text-success">0 Ks</h2>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card text-white p-3 shadow" style="background: linear-gradient(135deg, #78350f 0%, #92400e 100%); border: 1px solid #b45309;">
+                            <div class="card p-3 shadow">
                                 <div class="card-body">
                                     <h6 class="card-title text-uppercase fw-bold opacity-75" data-i18n="lbl_total_adv">Total Advances Outstanding</h6>
-                                    <h2 id="total-advances" class="display-5 fw-bold mt-2 text-white">0 Ks</h2>
+                                    <h2 id="total-advances" class="display-5 fw-bold mt-2 text-warning">0 Ks</h2>
                                 </div>
                             </div>
                         </div>
@@ -148,8 +169,8 @@
 
                 <!-- 2. EMPLOYEES TAB -->
                 <div id="tab-employees" class="content-tab" style="display:none;">
-                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom border-secondary">
-                        <h2 class="h3 fw-bold text-white"><i class="fa-solid fa-users me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_employees">Employee Directory</span></h2>
+                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
+                        <h2 class="h3 fw-bold"><i class="fa-solid fa-users me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_employees">Employee Directory</span></h2>
                     </div>
                     <div class="card mb-4">
                         <div class="card-body p-4">
@@ -193,9 +214,7 @@
                                             <th class="text-end pe-4" data-i18n="tbl_actions">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="employee-table-body">
-                                        <!-- Dynamic Data -->
-                                    </tbody>
+                                    <tbody id="employee-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -204,11 +223,11 @@
 
                 <!-- 3. DAILY ATTENDANCE TAB -->
                 <div id="tab-attendance" class="content-tab" style="display:none;">
-                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom border-secondary">
-                        <h2 class="h3 fw-bold text-white"><i class="fa-solid fa-calendar-check me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_attendance">Daily Attendance Management</span></h2>
+                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
+                        <h2 class="h3 fw-bold"><i class="fa-solid fa-calendar-check me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_attendance">Daily Attendance Management</span></h2>
                         <div class="d-flex align-items-center gap-2">
                             <label class="fw-bold text-secondary" data-i18n="lbl_select_date">Select Date:</label>
-                            <input type="date" id="attendance-date" class="form-control text-white" onchange="loadAttendanceForDate()">
+                            <input type="date" id="attendance-date" class="form-control" onchange="loadAttendanceForDate()">
                         </div>
                     </div>
                     <div class="card">
@@ -225,9 +244,7 @@
                                             <th class="pe-4" data-i18n="tbl_total_absent">Total Absent</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="attendance-table-body">
-                                        <!-- Dynamic Attendance Data -->
-                                    </tbody>
+                                    <tbody id="attendance-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -236,8 +253,8 @@
 
                 <!-- 4. PERFORMANCE & SALARY TAB -->
                 <div id="tab-performance" class="content-tab" style="display:none;">
-                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom border-secondary">
-                        <h2 class="h3 fw-bold text-white"><i class="fa-solid fa-file-invoice-dollar me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_performance">Performance & Salary Calculations</span></h2>
+                    <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
+                        <h2 class="h3 fw-bold"><i class="fa-solid fa-file-invoice-dollar me-2" style="color: var(--accent-color);"></i><span data-i18n="menu_performance">Performance & Salary Calculations</span></h2>
                     </div>
                     <div class="card mb-4">
                         <div class="card-body p-4">
@@ -299,9 +316,7 @@
                                             <th class="text-end pe-4" data-i18n="tbl_actions">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="payroll-table-body">
-                                        <!-- Dynamic Data -->
-                                    </tbody>
+                                    <tbody id="payroll-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -315,7 +330,7 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- JavaScript Logic & Multi-language Support -->
+    <!-- JavaScript Logic & Theme/Language Support -->
     <script>
         const translations = {
             en: {
@@ -355,10 +370,11 @@
                 tbl_total_present: "Total Present",
                 tbl_total_absent: "Total Absent",
                 lbl_select_date: "Select Date:",
-                currency: "Ks"
+                dark_mode: "Dark Mode",
+                light_mode: "Light Mode"
             },
             my: {
-                menu_dashboard: "ပင်မမစာမျက်နှာ (Dashboard)",
+                menu_dashboard: "ပင်မစာမျက်နှာ (Dashboard)",
                 menu_employees: "ဝန်ထမ်းစာရင်းများ",
                 menu_attendance: "နေ့စဉ် တက်ရောက်မှု",
                 menu_performance: "စွမ်းဆောင်ရည်နှင့် လစာ",
@@ -394,17 +410,44 @@
                 tbl_total_present: "စုစုပေါင်း လာသည့်ရက်",
                 tbl_total_absent: "စုစုပေါင်း ပျက်သည့်ရက်",
                 lbl_select_date: "ရက်စွဲရွေးရန်:",
-                currency: "ကျပ်"
+                dark_mode: "အမည်းရောင် (Dark)",
+                light_mode: "အဖြူရောင် (Light)"
             }
         };
 
         let currentLang = localStorage.getItem('hr_lang') || 'en';
+        let currentTheme = localStorage.getItem('hr_theme') || 'dark';
+
+        // Apply saved theme on load
+        document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        updateThemeButtonUI();
+
+        function toggleTheme() {
+            currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', currentTheme);
+            localStorage.setItem('hr_theme', currentTheme);
+            updateThemeButtonUI();
+        }
+
+        function updateThemeButtonUI() {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const t = translations[currentLang];
+            if(currentTheme === 'dark') {
+                icon.className = 'fa-solid fa-moon me-1';
+                text.innerText = t.dark_mode;
+            } else {
+                icon.className = 'fa-solid fa-sun me-1 text-warning';
+                text.innerText = t.light_mode;
+            }
+        }
 
         function changeLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('hr_lang', lang);
             document.getElementById('current-lang-text').innerText = (lang === 'en') ? 'English' : 'မြန်မာ';
             updateTexts();
+            updateThemeButtonUI();
             renderAll();
         }
 
