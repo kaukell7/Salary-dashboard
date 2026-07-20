@@ -36,16 +36,20 @@
         .form-control::placeholder { color: #64748b; }
         
         /* Dark Tables & Fix Text Contrast for All Table Data */
-        .table { color: var(--text-primary); border-color: var(--border-color); }
+        .table { color: #f8fafc !important; border-color: var(--border-color); }
         .table-dark { background-color: #090d16 !important; color: #fff; border-color: var(--border-color); }
         
         .table tbody tr {
             background-color: #1e293b !important;
             color: #f8fafc !important;
         }
-        .table tbody tr td {
+        .table tbody tr td, 
+        .table tbody tr td span, 
+        .table tbody tr td strong,
+        .table tbody tr td div {
             color: #f8fafc !important;
         }
+        
         .table-hover tbody tr:hover {
             background-color: #334155 !important;
         }
