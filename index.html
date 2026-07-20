@@ -162,7 +162,7 @@
                     </div>
                 </div>
 
-                <!-- 3. DAILY ATTENDANCE TAB (NEW) -->
+                <!-- 3. DAILY ATTENDANCE TAB -->
                 <div id="tab-attendance" class="content-tab" style="display:none;">
                     <div class="d-flex justify-content-between align-items-center pt-2 pb-3 mb-4 border-bottom">
                         <h2 class="h3 fw-bold text-dark"><i class="fa-solid fa-calendar-check me-2 text-primary"></i><span data-i18n="menu_attendance">Daily Attendance Management</span></h2>
@@ -251,7 +251,7 @@
                                             <th data-i18n="tbl_rating">Rating</th>
                                             <th data-i18n="tbl_deduct">Deductions</th>
                                             <th data-i18n="tbl_att_bonus">Attendance Bonus</th>
-                                            <th data-i18n="tbl_adv">Advance</th>
+                                            <th data-i18n="tbl_adv">Advance Balance</th>
                                             <th data-i18n="tbl_repay">Repayment</th>
                                             <th data-i18n="tbl_net">Net Salary</th>
                                             <th class="text-end pe-4" data-i18n="tbl_actions">Actions</th>
@@ -303,7 +303,7 @@
                 tbl_rating: "Rating",
                 tbl_deduct: "Deductions",
                 tbl_att_bonus: "Att. Bonus",
-                tbl_adv: "Advance",
+                tbl_adv: "Advance Balance",
                 tbl_repay: "Repayment",
                 tbl_net: "Net Salary",
                 tbl_status: "Status (Done / Off)",
@@ -339,7 +339,7 @@
                 tbl_rating: "အမှတ်",
                 tbl_deduct: "ဖြတ်ငွေ",
                 tbl_att_bonus: "ရက်မှန်ကြေး",
-                tbl_adv: "ချေးငွေ",
+                tbl_adv: "ကျန်ရှိချေးငွေ",
                 tbl_repay: "ပြန်ဆပ်ငွေ",
                 tbl_net: "လက်ကျန်လစာ (Net)",
                 tbl_status: "အခြေအနေ (Done / Off)",
@@ -379,9 +379,7 @@
         let employees = JSON.parse(localStorage.getItem('hr_employees')) || [];
         let payrolls = JSON.parse(localStorage.getItem('hr_payrolls')) || [];
         let attendanceRecords = JSON.parse(localStorage.getItem('hr_attendance')) || {}; 
-        // Format of attendanceRecords: { "YYYY-MM-DD": { empId: "done" or "off", ... }, ... }
 
-        // Set default date input to today
         const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('attendance-date').value = todayStr;
 
@@ -438,7 +436,6 @@
                 attendanceRecords[dateStr] = {};
             }
 
-            // Toggle current status (default to 'done' if not set, or switch between done/off)
             const currentStatus = attendanceRecords[dateStr][empId] || 'done';
             attendanceRecords[dateStr][empId] = (currentStatus === 'done') ? 'off' : 'done';
 
@@ -472,7 +469,7 @@
 
             let attHtml = '';
             employees.forEach(emp => {
-                const status = attendanceRecords[dateStr][emp.id] || 'done'; // default done
+                const status = attendanceRecords[dateStr][emp.id] || 'done';
                 attendanceRecords[dateStr][emp.id] = status;
 
                 const totals = calculateTotals(emp.id);
@@ -520,13 +517,16 @@
             if(rating === 5) bonus = emp.baseSalary * 0.10;
             else if(rating === 1) bonus = -(emp.baseSalary * 0.10);
 
-            // ရက်မှန်ကြေး သတ်မှတ်ချက် (၂ ရက် သို့မဟုတ် အောက်ဆိုလျှင် ရမည်၊ ၂ ရက်ထက် ပိုပါက ၀)
             let attendanceBonus = (absenceDays <= 2) ? baseAttBonus : 0;
 
+            // Net Salary တွက်ချက်ခြင်း (လစာထဲမှ Advance ယူငွေနှုတ်ပြီး၊ Repayment ပြန်ဆပ်ငွေကို ပေါင်းထည့်သည်)
             let netSalary = emp.baseSalary + bonus + attendanceBonus - deductions - advance + repayment;
 
+            // နောက်လကျန်ရှိမည့် ချေးငွေလက်ကျန် (Remaining Advance Balance) = ယူထားသောငွေ (advance) - ပြန်ဆပ်ငွေ (repayment)
+            let remainingAdvance = advance - repayment;
+
             const existingIndex = payrolls.findIndex(x => x.empId == empId);
-            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, advance, repayment, netSalary };
+            const payrollData = { empId, rating, deductions, absenceDays, attendanceBonus, advance: remainingAdvance, repayment, netSalary };
 
             if(existingIndex >= 0) {
                 payrolls[existingIndex] = payrollData;
@@ -575,7 +575,7 @@
                 const emp = employees.find(x => x.id == p.empId);
                 if(!emp) return;
                 totalNet += p.netSalary;
-                totalAdv += p.advance;
+                totalAdv += Math.abs(p.advance);
 
                 payHtml += `<tr>
                     <td class="ps-4"><strong>${emp.name}</strong></td>
@@ -584,7 +584,7 @@
                     <td class="text-danger">-${p.deductions.toLocaleString()} ${curr}</td>
                     <td class="text-success fw-semibold">+${p.attendanceBonus.toLocaleString()} ${curr}</td>
                     <td class="text-warning fw-semibold">-${p.advance.toLocaleString()} ${curr}</td>
-                    <td class="text-primary fw-semibold">+${p.repayment.toLocaleString()} ${curr}</td>
+                    <td class="text-danger fw-semibold">-${p.repayment.toLocaleString()} ${curr}</td>
                     <td class="fw-bold text-success">${p.netSalary.toLocaleString()} ${curr}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-danger" onclick="deletePayroll(${p.empId})"><i class="fa-solid fa-trash"></i></button>
